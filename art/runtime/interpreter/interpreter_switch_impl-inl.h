@@ -38,6 +38,8 @@
 #include "shadow_frame-inl.h"
 #include "thread.h"
 #include "verifier/method_verifier.h"
+#include "urzpk/u33pk.h"
+#include "urzpk/u3conf.h"
 
 namespace art {
 namespace interpreter {
@@ -2643,6 +2645,13 @@ ATTRIBUTE_NO_SANITIZE_ADDRESS void ExecuteSwitchImplCpp(SwitchImplContext* ctx) 
       << "Entered interpreter from invoke without retry instruction being handled!";
 
   bool const interpret_one_instruction = ctx->interpret_one_instruction;
+  art::urzpk::U3conf conf;
+  if(conf.shouldUnpk()) {
+      art::urzpk::U33pk::DumpDexFile(shadow_frame.GetMethod());
+      if(conf.shouldUnpkMethod(shadow_frame.GetMethod()->PrettyMethod(true)))
+        art::urzpk::U33pk::DumpArtMethod(shadow_frame.GetMethod());
+
+  }
   while (true) {
     dex_pc = inst->GetDexPc(insns);
     shadow_frame.SetDexPC(dex_pc);

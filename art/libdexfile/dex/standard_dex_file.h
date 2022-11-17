@@ -38,6 +38,7 @@ class StandardDexFile : public DexFile {
    private:
     CodeItem() = default;
 
+  public:
     uint16_t registers_size_;            // the number of registers used by this code
                                          //   (locals + parameters)
     uint16_t ins_size_;                  // the number of words of incoming arguments to the method

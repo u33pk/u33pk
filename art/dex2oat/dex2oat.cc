@@ -98,6 +98,8 @@
 #include "verifier/verifier_deps.h"
 #include "well_known_classes.h"
 
+#include "urzpk/u3conf.h"
+
 namespace art {
 
 using android::base::StringAppendV;
@@ -1241,6 +1243,10 @@ class Dex2Oat final {
 
     // Insert some compiler things.
     InsertCompileOptions(argc, argv);
+    urzpk::U3conf conf;
+    if(conf.shouldUnpk(oat_location_)){
+      compiler_options_->SetCompilerFilter(CompilerFilter::kVerify);
+    }
   }
 
   // Check whether the oat output files are writable, and open them for later. Also open a swap
