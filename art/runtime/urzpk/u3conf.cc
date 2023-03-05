@@ -14,12 +14,26 @@ namespace art
                 getline(conf_fs, _line, '\n');
                 if (_line.find(UPK_TAG) != string::npos)
                 {
-                    this->conf_pkg = _line.substr(strlen(UPK_TAG) + 3);
-//                    LOG(INFO) << this->conf_pkg;
+                    // this->conf_pkg = _line.substr(strlen(UPK_TAG) + 3);
+                    this->conf_pkg = ITEM_VALUE(UPK_TAG);
+                    //                    LOG(INFO) << this->conf_pkg;
                     urzlog::info(UPK_TAG, "U3conf::U3conf", this->conf_pkg);
-                } else if (_line.find(UPK_FUNC_TAG) != string::npos) {
-                    this->conf_func = _line.substr(strlen(UPK_FUNC_TAG) + 3);
+                }
+                else if (FIND_ITEM(UPK_FUNC_TAG))
+                {
+                    // this->conf_func = _line.substr(strlen(UPK_FUNC_TAG) + 3);
+                    this->conf_func = ITEM_VALUE(UPK_FUNC_TAG);
                     urzlog::info(UPK_FUNC_TAG, "U3conf::U3conf", this->conf_func);
+                }
+                else if (FIND_ITEM(TRACE_TAG))
+                {
+                    this->conf_trace_smali = ITEM_VALUE(TRACE_TAG);
+                    urzlog::info(TRACE_TAG, "U33conf::U33conf", this->conf_trace_smali);
+                }
+                else if (FIND_ITEM(TRACE_JNI))
+                {
+                    this->conf_trace_jni = ITEM_VALUE(TRACE_JNI);
+                    urzlog::info(TRACE_JNI, "U3conf::U3conf", this->conf_trace_jni);
                 }
             }
         }
@@ -32,12 +46,13 @@ namespace art
             string current_pkg = U3conf::getSelfProcessName();
             return shouldUnpk(current_pkg);
         }
-        
-        bool U3conf::shouldUnpk(string current_pkg){
+
+        bool U3conf::shouldUnpk(string current_pkg)
+        {
 
             if (this->conf_pkg.size() > 0 && current_pkg.find(this->conf_pkg) != string::npos)
             {
-//                LOG(INFO) << "[u33pk] " << this->conf_pkg;
+                //                LOG(INFO) << "[u33pk] " << this->conf_pkg;
                 urzlog::info(DEFAULT_TAG, "U3conf::shouldUnpk", current_pkg);
                 return true;
             }
@@ -47,8 +62,10 @@ namespace art
             }
         }
 
-        bool U3conf::shouldUnpkMethod(string method_name) {
-            if(this->conf_func.size() > 0 && method_name.find(this->conf_func) != string::npos){
+        bool U3conf::shouldUnpkMethod(string method_name)
+        {
+            if (this->conf_func.size() > 0 && method_name.find(this->conf_func) != string::npos)
+            {
                 urzlog::info(DEFAULT_TAG, "U3conf::shouldUnpkMethod", method_name);
                 return true;
             }
@@ -73,7 +90,7 @@ namespace art
             file_in.open(_cmdline.str(), ios::in);
             if (!file_in.is_open())
             {
-//                LOG(INFO) << "{orz} not found " << _cmdline.str();
+                //                LOG(INFO) << "{orz} not found " << _cmdline.str();
                 return "";
             }
             string self_name;
@@ -87,6 +104,26 @@ namespace art
                 self_name = self_name.substr(0, _pos);
             }
             return self_name;
+        }
+
+        bool U3conf::ShouldTraceSmali(string method_name)
+        {
+            if (this->conf_trace_smali.size() > 0 && method_name.find(this->conf_trace_smali) != string::npos)
+            {
+                urzlog::info(DEFAULT_TAG, "U3conf::ShouldTraceSmali", method_name);
+                return true;
+            }
+            return false;
+        }
+
+        bool U3conf::shouldTraceJni(string method_name)
+        {
+            if (this->conf_trace_jni.size() > 0 && method_name.find(this->conf_trace_jni) != string::npos)
+            {
+                urzlog::info(DEFAULT_TAG, "U3conf::shouldTraceJni", method_name);
+                return true;
+            }
+            return false;
         }
 
     } // namespace urzpk

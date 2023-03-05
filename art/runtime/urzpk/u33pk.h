@@ -12,6 +12,8 @@
 #include "art_method.h"
 #include "art_method-inl.h"
 #include "dex/standard_dex_file.h"
+#include "thread.h"
+#include "managed_stack.h"
 
 #include "u3conf.h"
 #include "urzlog.h"
@@ -33,10 +35,14 @@ namespace art
             ~U33pk();
 
             static char* Base64Encode(char *str, long str_len, long *outlen);
-            static void DumpDexFile(ArtMethod* method) REQUIRES_SHARED(Locks::mutator_lock_);
-            static void DumpArtMethod(ArtMethod *method) REQUIRES_SHARED(Locks::mutator_lock_);
+            static void DumpDexFile(string self_name, ArtMethod* method) REQUIRES_SHARED(Locks::mutator_lock_);
+            static void DumpArtMethod(string self_name, ArtMethod *method) REQUIRES_SHARED(Locks::mutator_lock_);
             static void WriteToFile(string tk_dex_name, char* begen, size_t _sz) REQUIRES_SHARED(Locks::mutator_lock_);
             static void WriteToFile(string tk_item_name, string method_count) REQUIRES_SHARED(Locks::mutator_lock_);
+            static ArtMethod* BeforJNITrace(Thread *thread, ArtMethod *current_method) REQUIRES_SHARED(Locks::mutator_lock_);
+            static void AfterJNITrace(ArtMethod *caller_method, ArtMethod *current_method) REQUIRES_SHARED(Locks::mutator_lock_);
+            static void DumpJNIRegister(const char* name, const char* sig, const void* fnPtr) REQUIRES_SHARED(Locks::mutator_lock_);
+            static ofstream GetTraceSmaliStream(string current_pkg, ArtMethod *method) REQUIRES_SHARED(Locks::mutator_lock_);
         };
 
         

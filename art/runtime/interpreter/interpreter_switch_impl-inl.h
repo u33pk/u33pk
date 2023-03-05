@@ -17,6 +17,8 @@
 #ifndef ART_RUNTIME_INTERPRETER_INTERPRETER_SWITCH_IMPL_INL_H_
 #define ART_RUNTIME_INTERPRETER_INTERPRETER_SWITCH_IMPL_INL_H_
 
+#include <fstream>
+#include <cstddef>
 #include "interpreter_switch_impl.h"
 
 #include "base/enums.h"
@@ -2646,16 +2648,23 @@ ATTRIBUTE_NO_SANITIZE_ADDRESS void ExecuteSwitchImplCpp(SwitchImplContext* ctx) 
 
   bool const interpret_one_instruction = ctx->interpret_one_instruction;
   art::urzpk::U3conf conf;
-  if(conf.shouldUnpk()) {
-      art::urzpk::U33pk::DumpDexFile(shadow_frame.GetMethod());
+  std::ofstream trace_log_file_stream;
+  std::string current_pkg = art::urzpk::U3conf::getSelfProcessName();
+  if(conf.shouldUnpk(current_pkg)) {
+      art::urzpk::U33pk::DumpDexFile(current_pkg, shadow_frame.GetMethod());
       if(conf.shouldUnpkMethod(shadow_frame.GetMethod()->PrettyMethod(true)))
-        art::urzpk::U33pk::DumpArtMethod(shadow_frame.GetMethod());
-
-  }
+        art::urzpk::U33pk::DumpArtMethod(current_pkg, shadow_frame.GetMethod());
+      if(conf.ShouldTraceSmali(shadow_frame.GetMethod()->PrettyMethod(true)))
+        trace_log_file_stream = art::urzpk::U33pk::GetTraceSmaliStream(current_pkg, shadow_frame.GetMethod());
+      // else trace_log_file_stream = NULL;
+  } 
+  // else {
+  //   trace_log_file_stream = NULL;
+  // }
   while (true) {
     dex_pc = inst->GetDexPc(insns);
     shadow_frame.SetDexPC(dex_pc);
-    TraceExecution(shadow_frame, inst, dex_pc);
+    TraceExecution(shadow_frame, inst, dex_pc, trace_log_file_stream);
     inst_data = inst->Fetch16(0);
     {
       bool exit_loop = false;
@@ -2690,6 +2699,9 @@ DEX_INSTRUCTION_LIST(OPCODE_CASE)
     if (UNLIKELY(interpret_one_instruction)) {
       break;
     }
+  }
+  if(trace_log_file_stream.is_open()){
+    trace_log_file_stream.close();
   }
   // Record where we stopped.
   shadow_frame.SetDexPC(inst->GetDexPc(insns));

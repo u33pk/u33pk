@@ -18,14 +18,19 @@ namespace art
     {
         static constexpr char conf_path[] = "/data/local/tmp/u33pk.conf";
         static constexpr char UPK_TAG[] = "u33pk_pkg";
-        static constexpr char TRACE_TAG[] = "trace_pkg";
+        static constexpr char TRACE_TAG[] = "trace_smali";
+        static constexpr char TRACE_JNI[] = "trace_jni";
         static constexpr char UPK_FUNC_TAG[] = "u33pk_func";
         static constexpr char FRIDAPK_TAG[] = "frida_pkg";
+        #define ITEM_VALUE(ITEM_NAME) _line.substr(strlen(ITEM_NAME) + 3)
+        #define FIND_ITEM(ITEM_NAME) _line.find(ITEM_NAME) != string::npos
         class U3conf
         {
         private:
             string conf_pkg;
             string conf_func;
+            string conf_trace_smali;
+            string conf_trace_jni;
 
         public:
             U3conf();
@@ -34,8 +39,10 @@ namespace art
             bool shouldUnpk(string current_pkg);
             bool shouldUnpkMethod(string method_name);
             U3conf* getInstence();
-
+            bool ShouldTraceSmali(string method_name);
+            bool shouldTraceJni(string method_name);
             static string getSelfProcessName();
+            
         };
         
     } // namespace urzpk

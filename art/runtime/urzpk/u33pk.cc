@@ -2,7 +2,6 @@
 
 #include "u33pk.h"
 
-
 namespace art
 {
     class DexFile;
@@ -46,18 +45,18 @@ namespace art
             return res;
         }
 
-        void U33pk::DumpDexFile(ArtMethod *method)
+        void U33pk::DumpDexFile(string self_name, ArtMethod *method)
         {
-            string self_name = urzpk::U3conf::getSelfProcessName();
+            // string self_name = urzpk::U3conf::getSelfProcessName();
             if (self_name.length() > 1)
             {
                 const DexFile *dex_file = method->GetDexFile();
                 const uint8_t *dex_begin = dex_file->Begin();
                 size_t dex_size = dex_file->Size();
-//                LOG(INFO) << to_string(dex_size);
+                //                LOG(INFO) << to_string(dex_size);
                 stringstream program_dex_path;
                 program_dex_path << "/data/data/" << self_name << "/u33pk/";
-//                LOG(INFO) << "out dex: " << program_dex_path.str();
+                //                LOG(INFO) << "out dex: " << program_dex_path.str();
                 if (access(program_dex_path.str().c_str(), F_OK) != 0)
                 {
                     mkdir(program_dex_path.str().c_str(), 0777);
@@ -70,9 +69,11 @@ namespace art
             return;
         }
 
-        void U33pk::DumpArtMethod(ArtMethod *method){
-            string self_name = urzpk::U3conf::getSelfProcessName();
-            if(self_name.size() > 1) {
+        void U33pk::DumpArtMethod(string self_name, ArtMethod *method)
+        {
+            // string self_name = urzpk::U3conf::getSelfProcessName();
+            if (self_name.size() > 1)
+            {
                 const DexFile *dex_file = method->GetDexFile();
                 size_t dex_size = dex_file->Size();
                 stringstream program_dex_path;
@@ -84,19 +85,23 @@ namespace art
                 stringstream tk_item_name;
                 tk_item_name << program_dex_path.str() << "item_" << to_string(dex_size) << ".item";
                 const dex::CodeItem *item = method->GetCodeItem();
-                const StandardDexFile::CodeItem *stand_code_item = reinterpret_cast<const StandardDexFile::CodeItem*>(item);
+                const StandardDexFile::CodeItem *stand_code_item = reinterpret_cast<const StandardDexFile::CodeItem *>(item);
                 uint32_t item_len = 0;
-                if(stand_code_item != nullptr){
+                if (stand_code_item != nullptr)
+                {
                     item_len = dex_file->GetCodeItemSize(*stand_code_item);
                 }
-                if(item_len <= 0) return;
+                if (item_len <= 0)
+                    return;
                 uint32_t method_idx_ = method->GetDexMethodIndex();
-//                method->GetDexMethodIndex();
+                //                method->GetDexMethodIndex();
                 stringstream method_count_stream;
                 long encode_len;
-                method_count_stream << to_string(method_idx_) << " : " << U33pk::Base64Encode((char*)item, item_len, &encode_len) << "\n";
+                // method_count_stream << to_string(method_idx_) << " : " << U33pk::Base64Encode((char*)item, item_len, &encode_len) << "\n";
+                method_count_stream << method->PrettyMethod() << " : " << to_string(method_idx_) << " : " << U33pk::Base64Encode((char *)item, item_len, &encode_len) << "\n";
                 stringstream tk_item_name_;
-                tk_item_name_ << "/data/data/" << self_name << "/u33pk/" << "dex_" << to_string(dex_size) << ".item";
+                tk_item_name_ << "/data/data/" << self_name << "/u33pk/"
+                              << "dex_" << to_string(dex_size) << ".item";
                 U33pk::WriteToFile(tk_item_name_.str(), method_count_stream.str());
                 urzlog::info(DEFAULT_TAG, "U33pk::DumpArtMethod", tk_item_name_.str());
             }
@@ -111,12 +116,85 @@ namespace art
             file_out.close();
         }
 
-        void U33pk::WriteToFile(string tk_item_name, string method_count) {
+        void U33pk::WriteToFile(string tk_item_name, string _count)
+        {
             ofstream file_out;
             file_out.open(tk_item_name, ios::app);
-            file_out.write(method_count.c_str(), method_count.size());
+            file_out.write(_count.c_str(), _count.size());
             file_out.flush();
             file_out.close();
+        }
+
+        ofstream U33pk::GetTraceSmaliStream(string current_pkg, ArtMethod *method)
+        {
+            ofstream trace_smali_out;
+            // const DexFile *dex_file = method->GetDexFile();
+            // size_t dex_size = dex_file->Size();
+            stringstream tk_item_name_;
+            tk_item_name_ << "/data/data/" << current_pkg << "/u33pk/"
+                          << "smali.txt";
+            trace_smali_out.open(tk_item_name_.str(), ios::app);
+            trace_smali_out << "---------- " << method->PrettyMethod() << " ----------\n";
+            return trace_smali_out;
+        }
+
+        ArtMethod *U33pk::BeforJNITrace(Thread *thread, ArtMethod *current_method)
+        {
+            ArtMethod *caller_method = nullptr;
+            stringstream tk_item_name_;
+            stringstream jni_trace_count;
+            string current_pkg = U3conf::getSelfProcessName();
+            U3conf conf;
+            // Thread* _thread = Thread::Current();
+            const ManagedStack *managedStack = thread->GetManagedStack();
+            if (managedStack != nullptr)
+            {
+                ArtMethod **temp_frame = managedStack->GetTopQuickFrame();
+                if (temp_frame != nullptr)
+                {
+                    caller_method = *temp_frame;
+                }
+            }
+
+            if (caller_method != nullptr)
+            {
+                if (!conf.shouldTraceJni(caller_method->PrettyMethod()))
+                    return nullptr;
+                tk_item_name_ << "/data/data/" << current_pkg << "/u33pk/"
+                              << "jni.txt";
+                // trace_smali_out.open(tk_item_name_.str(), ios::app);
+                jni_trace_count << "[JNI]" << caller_method->PrettyMethod() << " <-> " << current_method->PrettyMethod() << "\n";
+                U33pk::WriteToFile(tk_item_name_.str(), jni_trace_count.str());
+                return caller_method;
+            }
+            else
+            {
+                return nullptr;
+            }
+        }
+
+        void U33pk::AfterJNITrace(ArtMethod *caller_method, ArtMethod *current_method)
+        {
+            stringstream tk_item_name_;
+            stringstream jni_trace_count;
+            string current_pkg = U3conf::getSelfProcessName();
+            if (caller_method != nullptr)
+            {
+                tk_item_name_ << "/data/data/" << current_pkg << "/u33pk/"
+                              << "jni.txt";
+                // trace_smali_out.open(tk_item_name_.str(), ios::app);
+                jni_trace_count << "[JNI]" << caller_method->PrettyMethod() << " |-| " << current_method->PrettyMethod() << "\n";
+                U33pk::WriteToFile(tk_item_name_.str(), jni_trace_count.str());
+            }
+        }
+
+        void U33pk::DumpJNIRegister(const char* name, const char* sig, const void* fnPtr) {
+            stringstream tk_item_name_;
+            stringstream jni_register_count;
+            string current_pkg = U3conf::getSelfProcessName();
+            tk_item_name_ << "/data/data/" << current_pkg << "/u33pk/" << "jni.txt";
+            jni_register_count << name << " register in addr : " << fnPtr << " sig is " << sig << "\n";
+            U33pk::WriteToFile(tk_item_name_.str(), jni_register_count.str());
         }
 
         U33pk::U33pk(/* args */)
