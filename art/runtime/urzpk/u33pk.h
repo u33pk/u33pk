@@ -41,7 +41,7 @@ namespace art
             static void WriteToFile(string tk_item_name, string method_count) REQUIRES_SHARED(Locks::mutator_lock_);
             static ArtMethod* BeforJNITrace(Thread *thread, ArtMethod *current_method) REQUIRES_SHARED(Locks::mutator_lock_);
             static void AfterJNITrace(ArtMethod *caller_method, ArtMethod *current_method) REQUIRES_SHARED(Locks::mutator_lock_);
-            static void DumpJNIRegister(const char* name, const char* sig, const void* fnPtr) REQUIRES_SHARED(Locks::mutator_lock_);
+            static void DumpJNIRegister(string class_name, const char* name, const char* sig, const void* fnPtr) REQUIRES_SHARED(Locks::mutator_lock_);
             static ofstream GetTraceSmaliStream(string current_pkg, ArtMethod *method) REQUIRES_SHARED(Locks::mutator_lock_);
         };
 

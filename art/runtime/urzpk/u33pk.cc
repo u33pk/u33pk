@@ -64,7 +64,7 @@ namespace art
                 stringstream tk_dex_name;
                 tk_dex_name << program_dex_path.str() << "dex_" << to_string(dex_size) << ".dex";
                 WriteToFile(tk_dex_name.str(), (char *)dex_begin, dex_size);
-                urzlog::info(DEFAULT_TAG, "U33pk::DumpDexFile", tk_dex_name.str());
+                // urzlog::info(DEFAULT_TAG, "U33pk::DumpDexFile", tk_dex_name.str());
             }
             return;
         }
@@ -103,17 +103,29 @@ namespace art
                 tk_item_name_ << "/data/data/" << self_name << "/u33pk/"
                               << "dex_" << to_string(dex_size) << ".item";
                 U33pk::WriteToFile(tk_item_name_.str(), method_count_stream.str());
-                urzlog::info(DEFAULT_TAG, "U33pk::DumpArtMethod", tk_item_name_.str());
+                // urzlog::info(DEFAULT_TAG, "U33pk::DumpArtMethod", tk_item_name_.str());
             }
         }
 
         void U33pk::WriteToFile(string tk_dex_name, char *begen, size_t _sz)
         {
             ofstream file_out;
-            file_out.open(tk_dex_name, ios::out | ios::binary);
-            file_out.write(begen, _sz);
-            file_out.flush();
-            file_out.close();
+            struct stat info;
+            if(access(tk_dex_name.c_str(), F_OK) != 0){
+                file_out.open(tk_dex_name, ios::out | ios::binary);
+                file_out.write(begen, _sz);
+                file_out.flush();
+                file_out.close();
+            } else {
+                stat(tk_dex_name.c_str(), &info);
+                if((unsigned long)info.st_size != _sz) {
+                    // urzlog::info("u33pk", "U33pk::WriteToFile", tk_dex_name + "---" + to_string(info.st_size) + "---" + to_string(_sz));
+                    file_out.open(tk_dex_name, ios::out | ios::binary);
+                    file_out.write(begen, _sz);
+                    file_out.flush();
+                    file_out.close();
+                }
+            }
         }
 
         void U33pk::WriteToFile(string tk_item_name, string _count)
@@ -188,12 +200,12 @@ namespace art
             }
         }
 
-        void U33pk::DumpJNIRegister(const char* name, const char* sig, const void* fnPtr) {
+        void U33pk::DumpJNIRegister(string class_name, const char* name, const char* sig, const void* fnPtr) {
             stringstream tk_item_name_;
             stringstream jni_register_count;
             string current_pkg = U3conf::getSelfProcessName();
             tk_item_name_ << "/data/data/" << current_pkg << "/u33pk/" << "jni.txt";
-            jni_register_count << name << " register in addr : " << fnPtr << " sig is " << sig << "\n";
+            jni_register_count << class_name << "." << name << " " << sig << " register in addr : " << fnPtr << "\n";
             U33pk::WriteToFile(tk_item_name_.str(), jni_register_count.str());
         }
 

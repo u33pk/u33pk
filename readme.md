@@ -5,7 +5,7 @@
 ## 使用方法：
 把 art 目录直接覆盖到 AOSP 项目中， 编译即可。
 
-需要在 `/data/local/tmp/u33pk.conf` 写入配置文件
+* 编译好了之后, 刷入手机, 需要进行相对应的功能的时候, 在 `/data/local/tmp/u33pk.conf` 写入配置文件
 
 ```conf
 u33pk_pkg : <脱壳包名>

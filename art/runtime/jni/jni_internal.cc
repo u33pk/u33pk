@@ -2481,7 +2481,7 @@ class JNI {
       const char* name = methods[i].name;
       const char* sig = methods[i].signature;
       const void* fnPtr = methods[i].fnPtr;
-      art::urzpk::U33pk::DumpJNIRegister(name, sig, fnPtr);
+      art::urzpk::U33pk::DumpJNIRegister(c->PrettyDescriptor(), name, sig, fnPtr);
       if (UNLIKELY(name == nullptr)) {
         ReportInvalidJNINativeMethod(soa, c.Get(), "method name", i);
         return JNI_ERR;
