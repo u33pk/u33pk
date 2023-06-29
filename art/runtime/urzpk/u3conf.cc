@@ -11,30 +11,33 @@ namespace art
             if (conf_fs.good())
             {
                 string _line;
-                getline(conf_fs, _line, '\n');
-                if (_line.find(UPK_TAG) != string::npos)
-                {
-                    // this->conf_pkg = _line.substr(strlen(UPK_TAG) + 3);
-                    this->conf_pkg = ITEM_VALUE(UPK_TAG);
-                    //                    LOG(INFO) << this->conf_pkg;
-                    urzlog::info(UPK_TAG, "U3conf::U3conf", this->conf_pkg);
+                while(getline(conf_fs, _line, '\n')){
+                    // if (_line.find(UPK_TAG) != string::npos)
+                    if (FIND_ITEM(UPK_TAG))
+                    {
+                        // this->conf_pkg = _line.substr(strlen(UPK_TAG) + 3);
+                        this->conf_pkg = ITEM_VALUE(UPK_TAG);
+                        //                    LOG(INFO) << this->conf_pkg;
+                        // urzlog::info(UPK_TAG, "U3conf::U3conf", this->conf_pkg);
+                    }
+                    else if (FIND_ITEM(UPK_FUNC_TAG))
+                    {
+                        // this->conf_func = _line.substr(strlen(UPK_FUNC_TAG) + 3);
+                        this->conf_func = ITEM_VALUE(UPK_FUNC_TAG);
+                        // urzlog::info(UPK_FUNC_TAG, "U3conf::U3conf", this->conf_func);
+                    }
+                    else if (FIND_ITEM(TRACE_TAG))
+                    {
+                        this->conf_trace_smali = ITEM_VALUE(TRACE_TAG);
+                        // urzlog::info(TRACE_TAG, "U33conf::U33conf", this->conf_trace_smali);
+                    }
+                    else if (FIND_ITEM(TRACE_JNI))
+                    {
+                        this->conf_trace_jni = ITEM_VALUE(TRACE_JNI);
+                        // urzlog::info(TRACE_JNI, "U3conf::U3conf", this->conf_trace_jni);
+                    }
                 }
-                else if (FIND_ITEM(UPK_FUNC_TAG))
-                {
-                    // this->conf_func = _line.substr(strlen(UPK_FUNC_TAG) + 3);
-                    this->conf_func = ITEM_VALUE(UPK_FUNC_TAG);
-                    urzlog::info(UPK_FUNC_TAG, "U3conf::U3conf", this->conf_func);
-                }
-                else if (FIND_ITEM(TRACE_TAG))
-                {
-                    this->conf_trace_smali = ITEM_VALUE(TRACE_TAG);
-                    urzlog::info(TRACE_TAG, "U33conf::U33conf", this->conf_trace_smali);
-                }
-                else if (FIND_ITEM(TRACE_JNI))
-                {
-                    this->conf_trace_jni = ITEM_VALUE(TRACE_JNI);
-                    urzlog::info(TRACE_JNI, "U3conf::U3conf", this->conf_trace_jni);
-                }
+                conf_fs.close();
             }
         }
         U3conf::~U3conf()

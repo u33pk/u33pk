@@ -97,13 +97,13 @@ namespace art
                 //                method->GetDexMethodIndex();
                 stringstream method_count_stream;
                 long encode_len;
-                // method_count_stream << to_string(method_idx_) << " : " << U33pk::Base64Encode((char*)item, item_len, &encode_len) << "\n";
-                method_count_stream << method->PrettyMethod() << " : " << to_string(method_idx_) << " : " << U33pk::Base64Encode((char *)item, item_len, &encode_len) << "\n";
-                stringstream tk_item_name_;
-                tk_item_name_ << "/data/data/" << self_name << "/u33pk/"
-                              << "dex_" << to_string(dex_size) << ".item";
-                U33pk::WriteToFile(tk_item_name_.str(), method_count_stream.str());
-                // urzlog::info(DEFAULT_TAG, "U33pk::DumpArtMethod", tk_item_name_.str());
+                method_count_stream << to_string(method_idx_) << " : " << U33pk::Base64Encode((char*)item, item_len, &encode_len) << "\n";
+                // method_count_stream << method->PrettyMethod() << " : " << to_string(method_idx_) << " : " << U33pk::Base64Encode((char *)item, item_len, &encode_len) << "\n";
+                // stringstream tk_item_name_;
+                // tk_item_name_ << "/data/data/" << self_name << "/u33pk/"
+                //               << "dex_" << to_string(dex_size) << ".item";
+                U33pk::WriteToFile(tk_item_name.str(), method_count_stream.str());
+                // urzlog::info(DEFAULT_TAG, "U33pk::DumpArtMethod", tk_item_name.str());
             }
         }
 
@@ -170,8 +170,10 @@ namespace art
 
             if (caller_method != nullptr)
             {
-                if (!conf.shouldTraceJni(caller_method->PrettyMethod()))
+                if (!conf.shouldTraceJni(caller_method->PrettyMethod())){
+                    // urzlog::info(DEFAULT_TAG, "U33pk::BeforJNITrace", "not trace");
                     return nullptr;
+                }
                 tk_item_name_ << "/data/data/" << current_pkg << "/u33pk/"
                               << "jni.txt";
                 // trace_smali_out.open(tk_item_name_.str(), ios::app);
@@ -181,6 +183,7 @@ namespace art
             }
             else
             {
+                // urzlog::info(DEFAULT_TAG, "U33pk::BeforJNITrace", "caller_method == nullptr");
                 return nullptr;
             }
         }

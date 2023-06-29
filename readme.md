@@ -20,17 +20,17 @@ trace_jni : <函数名>
 4. smali trace 后的文件在 `/data/data/<pack_name>/u33pk/smali.txt`
 5. JNI调用跟踪的输出文件在 `/data/data/<pack_name>/u33pk/jni.txt`
 
-# future
-1. 函数回填
-2. frida集成
-3. ART 流量 FUZZ
-4. 反反调
-5. 或想起来的其他
+# 未来支持
+1. frida集成
+2. ART 流量 FUZZ
+3. 反反调
+4. 或想起来的其他
 
 # 更新内容
 
 |日期|摘要|
 ----|----|
-|2022.11.18| 基础脱壳功能 |
-|2023.02.25| 隐藏root, 增加adb root|
-|2323.03.06| JNI调用跟踪, 监控JNI动态注册, smali trace |
+|22.11.18| 基础脱壳功能 |
+|23.02.25| 隐藏root, 增加adb root|
+|23.03.06| JNI调用跟踪, 监控JNI动态注册, smali trace |
+|23.06.30| 抽取的函数回填, 修改抽取函数脱壳格式 |
