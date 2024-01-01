@@ -2651,9 +2651,9 @@ ATTRIBUTE_NO_SANITIZE_ADDRESS void ExecuteSwitchImplCpp(SwitchImplContext* ctx) 
   std::ofstream trace_log_file_stream;
   std::string current_pkg = art::urzpk::U3conf::getSelfProcessName();
   if(conf.shouldUnpk(current_pkg)) {
-      art::urzpk::U33pk::DumpDexFile(current_pkg, shadow_frame.GetMethod());
+      art::urzpk::U33pk::U33pkDEX(conf.getConfPkg(), shadow_frame.GetMethod());
       if(conf.shouldUnpkMethod(shadow_frame.GetMethod()->PrettyMethod(true)))
-        art::urzpk::U33pk::DumpArtMethod(current_pkg, shadow_frame.GetMethod());
+        art::urzpk::U33pk::U33pkMTD(conf.getConfPkg(), shadow_frame.GetMethod());
       if(conf.ShouldTraceSmali(shadow_frame.GetMethod()->PrettyMethod(true)))
         trace_log_file_stream = art::urzpk::U33pk::GetTraceSmaliStream(current_pkg, shadow_frame.GetMethod());
       // else trace_log_file_stream = NULL;

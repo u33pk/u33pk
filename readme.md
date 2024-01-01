@@ -16,9 +16,10 @@ trace_jni : <函数名>
 ### 需要注意
 1. 如果要脱函数， 必须在要脱壳的app内， 即 `u33pk_func` 单独使用不生效
 2. 冒号必须是英文半角， 前后各有一个空格。
-3. 脱壳后的文件在 `/data/data/<pack_name>/u33pk/`, .dex文件是整体脱壳的文件 .item文件是函数脱壳后的文件
-4. smali trace 后的文件在 `/data/data/<pack_name>/u33pk/smali.txt`
-5. JNI调用跟踪的输出文件在 `/data/data/<pack_name>/u33pk/jni.txt`
+3. 脱壳后的文件在 `/sdcard/Android/data/<pack_name>/u33pk/`, .dex文件是整体脱壳的文件 .item文件是函数脱壳后的文件
+4. smali trace 后的文件在 `/sdcard/Android/data/<pack_name>/u33pk/smali.txt`
+5. JNI调用跟踪的输出文件在 `/sdcard/Android/data/<pack_name>/u33pk/jni.txt`
+6. 如果 `/sdcard/Android/data/<pack_name>` 路径没有正常创建, 请自己创建,并赋予正确的全新啊
 
 # 未来支持
 1. frida集成
@@ -34,3 +35,4 @@ trace_jni : <函数名>
 |23.02.25| 隐藏root, 增加adb root|
 |23.03.06| JNI调用跟踪, 监控JNI动态注册, smali trace |
 |23.06.30| 抽取的函数回填, 修改抽取函数脱壳格式 |
+|24.01.01| 修改脱壳路径, 优化脱壳内容 |

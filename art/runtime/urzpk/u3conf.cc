@@ -56,7 +56,7 @@ namespace art
             if (this->conf_pkg.size() > 0 && current_pkg.find(this->conf_pkg) != string::npos)
             {
                 //                LOG(INFO) << "[u33pk] " << this->conf_pkg;
-                urzlog::info(DEFAULT_TAG, "U3conf::shouldUnpk", current_pkg);
+                // urzlog::info(DEFAULT_TAG, "U3conf::shouldUnpk", current_pkg);
                 return true;
             }
             else
@@ -69,7 +69,7 @@ namespace art
         {
             if (this->conf_func.size() > 0 && method_name.find(this->conf_func) != string::npos)
             {
-                urzlog::info(DEFAULT_TAG, "U3conf::shouldUnpkMethod", method_name);
+                // urzlog::info(DEFAULT_TAG, "U3conf::shouldUnpkMethod", method_name);
                 return true;
             }
             return false;
@@ -82,6 +82,10 @@ namespace art
                 U3CONF_INSTENCE = new U3conf();
             }
             return U3CONF_INSTENCE;
+        }
+
+        string U3conf::getConfPkg(){
+            return this->conf_pkg;
         }
 
         string U3conf::getSelfProcessName()
@@ -106,6 +110,7 @@ namespace art
             {
                 self_name = self_name.substr(0, _pos);
             }
+            // urzlog::info(DEFAULT_TAG, "getSelfProcessName", self_name);
             return self_name;
         }
 

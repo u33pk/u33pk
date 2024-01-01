@@ -45,17 +45,22 @@ namespace art
             return res;
         }
 
-        void U33pk::DumpDexFile(string self_name, ArtMethod *method)
+        // void U33pk::DumpDexFile(string self_name, ArtMethod *method)
+        void U33pk::U33pkDEX(string self_name, ArtMethod *method)
         {
             // string self_name = urzpk::U3conf::getSelfProcessName();
+            // string self_name = conf.getConfPkg();
             if (self_name.length() > 1)
             {
+                
                 const DexFile *dex_file = method->GetDexFile();
                 const uint8_t *dex_begin = dex_file->Begin();
                 size_t dex_size = dex_file->Size();
                 //                LOG(INFO) << to_string(dex_size);
                 stringstream program_dex_path;
-                program_dex_path << "/data/data/" << self_name << "/u33pk/";
+                // program_dex_path << "/data/data/" << self_name << "/u33pk/";
+                program_dex_path << "/storage/emulated/0/Android/data/" << self_name << "/files/u33pk/";
+                // program_dex_path << "/sdcard/u33pk/";
                 //                LOG(INFO) << "out dex: " << program_dex_path.str();
                 if (access(program_dex_path.str().c_str(), F_OK) != 0)
                 {
@@ -64,20 +69,26 @@ namespace art
                 stringstream tk_dex_name;
                 tk_dex_name << program_dex_path.str() << "dex_" << to_string(dex_size) << ".dex";
                 WriteToFile(tk_dex_name.str(), (char *)dex_begin, dex_size);
-                // urzlog::info(DEFAULT_TAG, "U33pk::DumpDexFile", tk_dex_name.str());
+                // urzlog::info(DEFAULT_TAG, "DumpDexFile", tk_dex_name.str());
             }
             return;
         }
 
-        void U33pk::DumpArtMethod(string self_name, ArtMethod *method)
+        // void U33pk::DumpArtMethod(string self_name, ArtMethod *method)
+        void U33pk::U33pkMTD(string self_name, ArtMethod *method)
         {
             // string self_name = urzpk::U3conf::getSelfProcessName();
+            // string self_name = conf.getConfPkg();
             if (self_name.size() > 1)
             {
+                // urzlog::info(DEFAULT_TAG, "DumpArtMethod", self_name);
                 const DexFile *dex_file = method->GetDexFile();
                 size_t dex_size = dex_file->Size();
                 stringstream program_dex_path;
-                program_dex_path << "/data/data/" << self_name << "/u33pk/";
+                // program_dex_path << "/data/data/" << self_name << "/u33pk/";
+                // /storage/emulated/0/Android/data/cn.com.spdb.mobilebank.per/files
+                program_dex_path << "/storage/emulated/0/Android/data/" << self_name << "/files/u33pk/";
+                // program_dex_path << "/sdcard/u33pk/";
                 if (access(program_dex_path.str().c_str(), F_OK) != 0)
                 {
                     mkdir(program_dex_path.str().c_str(), 0777);
@@ -85,56 +96,69 @@ namespace art
                 stringstream tk_item_name;
                 tk_item_name << program_dex_path.str() << "item_" << to_string(dex_size) << ".item";
                 const dex::CodeItem *item = method->GetCodeItem();
-                const StandardDexFile::CodeItem *stand_code_item = reinterpret_cast<const StandardDexFile::CodeItem *>(item);
-                uint32_t item_len = 0;
-                if (stand_code_item != nullptr)
-                {
-                    item_len = dex_file->GetCodeItemSize(*stand_code_item);
+                CodeItemDataAccessor accessor(*dex_file, item);
+                if(accessor.HasCodeItem()){
+                    uint32_t item_len = 0;
+                    uint8_t *_item = (uint8_t*)item;
+                    uint32_t ins_size = accessor.InsnsSizeInCodeUnits();
+                    if(accessor.TriesSize() > 0){
+                        const void *_tail = accessor.CodeItemDataEnd();
+                        uint8_t* tail = (uint8_t*)_tail;
+                        item_len = (uint32_t)(tail - _item);
+                    } else {
+                        item_len = 16 + ins_size * 2;
+                    }
+                    uint32_t method_idx_ = method->GetDexMethodIndex();
+                    stringstream method_count_stream;
+                    long encode_len;
+                    // method_count_stream << method->PrettyMethod() << " : " << to_string(method_idx_) << " : " << U33pk::Base64Encode((char *)item, item_len, &encode_len);
+                    method_count_stream << to_string(method_idx_) << " : " << U33pk::Base64Encode((char *)item, item_len, &encode_len);
+
+                    // method_count_stream << to_string(method_idx_) << " : " << U33pk::Base64Encode((char*)item, item_len, &encode_len) << "\n";
+                    U33pk::WriteToFile(tk_item_name.str(), method_count_stream.str());
                 }
-                if (item_len <= 0)
-                    return;
-                uint32_t method_idx_ = method->GetDexMethodIndex();
-                //                method->GetDexMethodIndex();
-                stringstream method_count_stream;
-                long encode_len;
-                method_count_stream << to_string(method_idx_) << " : " << U33pk::Base64Encode((char*)item, item_len, &encode_len) << "\n";
-                // method_count_stream << method->PrettyMethod() << " : " << to_string(method_idx_) << " : " << U33pk::Base64Encode((char *)item, item_len, &encode_len) << "\n";
-                // stringstream tk_item_name_;
-                // tk_item_name_ << "/data/data/" << self_name << "/u33pk/"
-                //               << "dex_" << to_string(dex_size) << ".item";
-                U33pk::WriteToFile(tk_item_name.str(), method_count_stream.str());
-                // urzlog::info(DEFAULT_TAG, "U33pk::DumpArtMethod", tk_item_name.str());
             }
         }
 
         void U33pk::WriteToFile(string tk_dex_name, char *begen, size_t _sz)
         {
+            
             ofstream file_out;
+            int dex_fd;
             struct stat info;
+            // void* dex_mem;
             if(access(tk_dex_name.c_str(), F_OK) != 0){
-                file_out.open(tk_dex_name, ios::out | ios::binary);
-                file_out.write(begen, _sz);
-                file_out.flush();
-                file_out.close();
+                dex_fd = open(tk_dex_name.c_str(), O_RDWR | O_CREAT, 0666);
+                // urzlog::info("orz", "begen", begen);
+                int w_sz = write(dex_fd, begen, _sz);
+                w_sz += 1;
+                close(dex_fd);
             } else {
                 stat(tk_dex_name.c_str(), &info);
                 if((unsigned long)info.st_size != _sz) {
-                    // urzlog::info("u33pk", "U33pk::WriteToFile", tk_dex_name + "---" + to_string(info.st_size) + "---" + to_string(_sz));
-                    file_out.open(tk_dex_name, ios::out | ios::binary);
-                    file_out.write(begen, _sz);
-                    file_out.flush();
-                    file_out.close();
+                    dex_fd = open(tk_dex_name.c_str(), O_RDWR | O_CREAT, 0666);
+                    int w_sz = write(dex_fd, begen, _sz);
+                    w_sz += 1;
+                    close(dex_fd);
                 }
             }
+            
         }
 
         void U33pk::WriteToFile(string tk_item_name, string _count)
         {
-            ofstream file_out;
-            file_out.open(tk_item_name, ios::app);
-            file_out.write(_count.c_str(), _count.size());
-            file_out.flush();
-            file_out.close();
+            // ofstream file_out;
+            // file_out.open(tk_item_name, ios::app);
+            // file_out.write(_count.c_str(), _count.size());
+            // file_out.flush();
+            // file_out.close();
+            
+            int item_fd = open(tk_item_name.c_str(), O_RDWR | O_APPEND | O_CREAT, 0666);
+            ssize_t write_len = write(item_fd, _count.c_str(), _count.size());
+            write_len += 1;
+            close(item_fd);
+            // urzlog::info("orz", "WriteToFile", _count);
+            
         }
 
         ofstream U33pk::GetTraceSmaliStream(string current_pkg, ArtMethod *method)
@@ -143,8 +167,7 @@ namespace art
             // const DexFile *dex_file = method->GetDexFile();
             // size_t dex_size = dex_file->Size();
             stringstream tk_item_name_;
-            tk_item_name_ << "/data/data/" << current_pkg << "/u33pk/"
-                          << "smali.txt";
+            tk_item_name_ << "/storage/emulated/0/Android/data/" << current_pkg << "/files/u33pk/smali.txt";
             trace_smali_out.open(tk_item_name_.str(), ios::app);
             trace_smali_out << "---------- " << method->PrettyMethod() << " ----------\n";
             return trace_smali_out;
@@ -174,10 +197,9 @@ namespace art
                     // urzlog::info(DEFAULT_TAG, "U33pk::BeforJNITrace", "not trace");
                     return nullptr;
                 }
-                tk_item_name_ << "/data/data/" << current_pkg << "/u33pk/"
-                              << "jni.txt";
+                tk_item_name_ << "/storage/emulated/0/Android/data/" << current_pkg << "/files/u33pk/jni.txt";
                 // trace_smali_out.open(tk_item_name_.str(), ios::app);
-                jni_trace_count << "[JNI]" << caller_method->PrettyMethod() << " <-> " << current_method->PrettyMethod() << "\n";
+                jni_trace_count << "[JNI]" << caller_method->PrettyMethod() << " <-> " << current_method->PrettyMethod();
                 U33pk::WriteToFile(tk_item_name_.str(), jni_trace_count.str());
                 return caller_method;
             }
@@ -195,8 +217,7 @@ namespace art
             string current_pkg = U3conf::getSelfProcessName();
             if (caller_method != nullptr)
             {
-                tk_item_name_ << "/data/data/" << current_pkg << "/u33pk/"
-                              << "jni.txt";
+                tk_item_name_ << "/storage/emulated/0/Android/data/" << current_pkg << "/files/u33pk/jni.txt";
                 // trace_smali_out.open(tk_item_name_.str(), ios::app);
                 jni_trace_count << "[JNI]" << caller_method->PrettyMethod() << " |-| " << current_method->PrettyMethod() << "\n";
                 U33pk::WriteToFile(tk_item_name_.str(), jni_trace_count.str());
@@ -207,7 +228,7 @@ namespace art
             stringstream tk_item_name_;
             stringstream jni_register_count;
             string current_pkg = U3conf::getSelfProcessName();
-            tk_item_name_ << "/data/data/" << current_pkg << "/u33pk/" << "jni.txt";
+            tk_item_name_ << "/storage/emulated/0/Android/data/" << current_pkg << "/files/u33pk/jni.txt";
             jni_register_count << class_name << "." << name << " " << sig << " register in addr : " << fnPtr << "\n";
             U33pk::WriteToFile(tk_item_name_.str(), jni_register_count.str());
         }

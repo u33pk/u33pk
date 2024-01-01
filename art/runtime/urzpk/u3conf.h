@@ -42,7 +42,7 @@ namespace art
             bool ShouldTraceSmali(string method_name);
             bool shouldTraceJni(string method_name);
             static string getSelfProcessName();
-            
+            string getConfPkg();
         };
         
     } // namespace urzpk

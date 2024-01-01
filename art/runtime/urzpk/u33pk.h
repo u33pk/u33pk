@@ -6,6 +6,9 @@
 #include <sstream>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 #include "art_method.h"
 #include "dex/dex_file.h"
@@ -35,8 +38,8 @@ namespace art
             ~U33pk();
 
             static char* Base64Encode(char *str, long str_len, long *outlen);
-            static void DumpDexFile(string self_name, ArtMethod* method) REQUIRES_SHARED(Locks::mutator_lock_);
-            static void DumpArtMethod(string self_name, ArtMethod *method) REQUIRES_SHARED(Locks::mutator_lock_);
+            static void U33pkDEX(string self_name, ArtMethod* method) REQUIRES_SHARED(Locks::mutator_lock_);
+            static void U33pkMTD(string self_name, ArtMethod *method) REQUIRES_SHARED(Locks::mutator_lock_);
             static void WriteToFile(string tk_dex_name, char* begen, size_t _sz) REQUIRES_SHARED(Locks::mutator_lock_);
             static void WriteToFile(string tk_item_name, string method_count) REQUIRES_SHARED(Locks::mutator_lock_);
             static ArtMethod* BeforJNITrace(Thread *thread, ArtMethod *current_method) REQUIRES_SHARED(Locks::mutator_lock_);
