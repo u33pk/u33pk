@@ -99,15 +99,8 @@ namespace art
                 CodeItemDataAccessor accessor(*dex_file, item);
                 if(accessor.HasCodeItem()){
                     uint32_t item_len = 0;
-                    uint8_t *_item = (uint8_t*)item;
                     uint32_t ins_size = accessor.InsnsSizeInCodeUnits();
-                    if(accessor.TriesSize() > 0){
-                        const void *_tail = accessor.CodeItemDataEnd();
-                        uint8_t* tail = (uint8_t*)_tail;
-                        item_len = (uint32_t)(tail - _item);
-                    } else {
-                        item_len = 16 + ins_size * 2;
-                    }
+                    item_len = 16 + ins_size * 2;
                     uint32_t method_idx_ = method->GetDexMethodIndex();
                     stringstream method_count_stream;
                     long encode_len;
