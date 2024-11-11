@@ -22,6 +22,7 @@ namespace art
         static constexpr char TRACE_JNI[] = "trace_jni";
         static constexpr char UPK_FUNC_TAG[] = "u33pk_func";
         static constexpr char FRIDAPK_TAG[] = "frida_pkg";
+        static constexpr char ACTIVE_DUMP[] = "active_dump";
         #define ITEM_VALUE(ITEM_NAME) _line.substr(strlen(ITEM_NAME) + 3)
         #define FIND_ITEM(ITEM_NAME) _line.find(ITEM_NAME) != string::npos
         class U3conf
@@ -31,6 +32,7 @@ namespace art
             string conf_func;
             string conf_trace_smali;
             string conf_trace_jni;
+            string conf_active_dump;
 
         public:
             U3conf();
@@ -41,6 +43,7 @@ namespace art
             U3conf* getInstence();
             bool ShouldTraceSmali(string method_name);
             bool shouldTraceJni(string method_name);
+            bool shouldActiveDump();
             static string getSelfProcessName();
             string getConfPkg();
         };

@@ -17,9 +17,15 @@
 #include "dex/standard_dex_file.h"
 #include "thread.h"
 #include "managed_stack.h"
+#include "mirror/class.h"
+
+#include "jni/jni_internal.h"
+#include "native/native_util.h"
+
 
 #include "u3conf.h"
 #include "urzlog.h"
+#include "u33act.h"
 
 namespace art
 {
@@ -42,12 +48,12 @@ namespace art
             static void U33pkMTD(string self_name, ArtMethod *method) REQUIRES_SHARED(Locks::mutator_lock_);
             static void WriteToFile(string tk_dex_name, char* begen, size_t _sz) REQUIRES_SHARED(Locks::mutator_lock_);
             static void WriteToFile(string tk_item_name, string method_count) REQUIRES_SHARED(Locks::mutator_lock_);
-            static ArtMethod* BeforJNITrace(Thread *thread, ArtMethod *current_method) REQUIRES_SHARED(Locks::mutator_lock_);
-            static void AfterJNITrace(ArtMethod *caller_method, ArtMethod *current_method) REQUIRES_SHARED(Locks::mutator_lock_);
+            static void BeforJNITrace(Thread *thread, ArtMethod *current_method) REQUIRES_SHARED(Locks::mutator_lock_);
+            // static void AfterJNITrace(ArtMethod *caller_method, ArtMethod *current_method, U3conf conf) REQUIRES_SHARED(Locks::mutator_lock_);
             static void DumpJNIRegister(string class_name, const char* name, const char* sig, const void* fnPtr) REQUIRES_SHARED(Locks::mutator_lock_);
             static ofstream GetTraceSmaliStream(string current_pkg, ArtMethod *method) REQUIRES_SHARED(Locks::mutator_lock_);
+            static void register_orz_u33pk_U33pk(JNIEnv* env);
         };
-
         
         
     } // namespace urzpk

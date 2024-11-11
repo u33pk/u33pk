@@ -41,7 +41,9 @@
 #include "thread.h"
 #include "verifier/method_verifier.h"
 #include "urzpk/u33pk.h"
+#include "urzpk/u33act.h"
 #include "urzpk/u3conf.h"
+#include "urzpk/urzlog.h"
 
 namespace art {
 namespace interpreter {
@@ -2628,6 +2630,7 @@ class InstructionHandler {
 template<bool do_access_check, bool transaction_active>
 ATTRIBUTE_NO_SANITIZE_ADDRESS void ExecuteSwitchImplCpp(SwitchImplContext* ctx) {
   Thread* self = ctx->self;
+  int resval = ctx->result_register.GetI();
   const CodeItemDataAccessor& accessor = ctx->accessor;
   ShadowFrame& shadow_frame = ctx->shadow_frame;
   if (UNLIKELY(!shadow_frame.HasReferenceArray())) {
@@ -2650,13 +2653,20 @@ ATTRIBUTE_NO_SANITIZE_ADDRESS void ExecuteSwitchImplCpp(SwitchImplContext* ctx) 
   art::urzpk::U3conf conf;
   std::ofstream trace_log_file_stream;
   std::string current_pkg = art::urzpk::U3conf::getSelfProcessName();
+  std::string method_name = shadow_frame.GetMethod()->PrettyMethod(true);
+  std::string thread_name;
+  self->GetThreadName(thread_name);
+  // art::urzpk::U33act* act = art::urzpk::U33act::getInstance(1, NULL);
   if(conf.shouldUnpk(current_pkg)) {
       art::urzpk::U33pk::U33pkDEX(conf.getConfPkg(), shadow_frame.GetMethod());
-      if(conf.shouldUnpkMethod(shadow_frame.GetMethod()->PrettyMethod(true)))
-        art::urzpk::U33pk::U33pkMTD(conf.getConfPkg(), shadow_frame.GetMethod());
-      if(conf.ShouldTraceSmali(shadow_frame.GetMethod()->PrettyMethod(true)))
+      // if(conf.shouldUnpkMethod(shadow_frame.GetMethod()->PrettyMethod(true)))
+      //   art::urzpk::U33pk::U33pkMTD(conf.getConfPkg(), shadow_frame.GetMethod());
+      if(conf.ShouldTraceSmali(method_name))
         trace_log_file_stream = art::urzpk::U33pk::GetTraceSmaliStream(current_pkg, shadow_frame.GetMethod());
-      // else trace_log_file_stream = NULL;
+      art::urzpk::U33pk::U33pkMTD(conf.getConfPkg(), shadow_frame.GetMethod());
+      art::urzpk::urzlog::info("orz", "ExecuteSwitchImplCpp", shadow_frame.GetMethod()->PrettyMethod(true));
+      if(art::urzpk::U33act::IsFakeInvoke(self) || resval == 114514)  // 放在这里可以保证被动脱壳有效 并且主动调用会退出
+        return;
   } 
   // else {
   //   trace_log_file_stream = NULL;

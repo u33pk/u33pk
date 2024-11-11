@@ -459,9 +459,10 @@ void InvokeWithArgArray(const ScopedObjectAccessAlreadyRunnable& soa,
   }
 
   Thread* _thread = Thread::Current();
-  ArtMethod* caller_method = art::urzpk::U33pk::BeforJNITrace(_thread, method);
+  // art::urzpk::U3conf conf;
+  art::urzpk::U33pk::BeforJNITrace(_thread, method);
   method->Invoke(soa.Self(), args, arg_array->GetNumBytes(), result, shorty);
-  art::urzpk::U33pk::AfterJNITrace(caller_method, method);
+  // art::urzpk::U33pk::AfterJNITrace(caller_method, method, conf);
 }
 
 ALWAYS_INLINE

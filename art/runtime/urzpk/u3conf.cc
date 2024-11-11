@@ -36,6 +36,10 @@ namespace art
                         this->conf_trace_jni = ITEM_VALUE(TRACE_JNI);
                         // urzlog::info(TRACE_JNI, "U3conf::U3conf", this->conf_trace_jni);
                     }
+                    else if (FIND_ITEM(ACTIVE_DUMP))
+                    {
+                        this->conf_active_dump = ITEM_VALUE(ACTIVE_DUMP);
+                    }
                 }
                 conf_fs.close();
             }
@@ -97,7 +101,6 @@ namespace art
             file_in.open(_cmdline.str(), ios::in);
             if (!file_in.is_open())
             {
-                //                LOG(INFO) << "{orz} not found " << _cmdline.str();
                 return "";
             }
             string self_name;
@@ -118,7 +121,7 @@ namespace art
         {
             if (this->conf_trace_smali.size() > 0 && method_name.find(this->conf_trace_smali) != string::npos)
             {
-                urzlog::info(DEFAULT_TAG, "U3conf::ShouldTraceSmali", method_name);
+                // urzlog::info(DEFAULT_TAG, "U3conf::ShouldTraceSmali", method_name);
                 return true;
             }
             return false;
@@ -128,7 +131,14 @@ namespace art
         {
             if (this->conf_trace_jni.size() > 0 && method_name.find(this->conf_trace_jni) != string::npos)
             {
-                urzlog::info(DEFAULT_TAG, "U3conf::shouldTraceJni", method_name);
+                // urzlog::info(DEFAULT_TAG, "U3conf::shouldTraceJni", method_name);
+                return true;
+            }
+            return false;
+        }
+
+        bool U3conf::shouldActiveDump(){
+            if(this->conf_active_dump.size() > 0 && this->conf_active_dump.find("true") != string::npos){
                 return true;
             }
             return false;

@@ -10,6 +10,7 @@
 ```conf
 u33pk_pkg : <脱壳包名>
 u33pk_func : <函数名>
+fake_invoke : true/false
 trace_smali : <函数名>
 trace_jni : <函数名>
 ```
@@ -43,3 +44,4 @@ trace_jni : <函数名>
 |24.01.01| 修改脱壳路径, 优化脱壳内容 |
 |24.03.01| 修改系统证书,使用release-key |
 |24.04.20| 优化函数脱壳效果 |
+|24.11.11| 增加主动调用 |

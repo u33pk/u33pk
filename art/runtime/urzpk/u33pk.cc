@@ -83,8 +83,13 @@ namespace art
             {
                 // urzlog::info(DEFAULT_TAG, "DumpArtMethod", self_name);
                 const DexFile *dex_file = method->GetDexFile();
+                const string& dex_location = dex_file->GetLocation();
+                if (dex_location.find("/data/") != 0) {
+                    return;
+                }
                 size_t dex_size = dex_file->Size();
                 stringstream program_dex_path;
+                uint32_t method_off = 0;
                 // program_dex_path << "/data/data/" << self_name << "/u33pk/";
                 // /storage/emulated/0/Android/data/cn.com.spdb.mobilebank.per/files
                 program_dex_path << "/storage/emulated/0/Android/data/" << self_name << "/files/u33pk/";
@@ -100,14 +105,13 @@ namespace art
                 if(accessor.HasCodeItem()){
                     uint32_t item_len = 0;
                     uint32_t ins_size = accessor.InsnsSizeInCodeUnits();
+                    method_off = (uint64_t)item - (uint64_t)(dex_file->Begin());
+
                     item_len = 16 + ins_size * 2;
                     uint32_t method_idx_ = method->GetDexMethodIndex();
                     stringstream method_count_stream;
                     long encode_len;
-                    // method_count_stream << method->PrettyMethod() << " : " << to_string(method_idx_) << " : " << U33pk::Base64Encode((char *)item, item_len, &encode_len);
-                    method_count_stream << to_string(method_idx_) << " : " << U33pk::Base64Encode((char *)item, item_len, &encode_len);
-
-                    // method_count_stream << to_string(method_idx_) << " : " << U33pk::Base64Encode((char*)item, item_len, &encode_len) << "\n";
+                    method_count_stream << to_string(method_idx_) << " : " << to_string(method_off) << " : " << U33pk::Base64Encode((char*)item, item_len, &encode_len) << "\n";
                     U33pk::WriteToFile(tk_item_name.str(), method_count_stream.str());
                 }
             }
@@ -122,8 +126,9 @@ namespace art
             // void* dex_mem;
             if(access(tk_dex_name.c_str(), F_OK) != 0){
                 dex_fd = open(tk_dex_name.c_str(), O_RDWR | O_CREAT, 0666);
-                // urzlog::info("orz", "begen", begen);
+                urzlog::info("orz", "begen", begen);
                 int w_sz = write(dex_fd, begen, _sz);
+                // int w_sz = write(dex_fd, "123456789", 10);
                 w_sz += 1;
                 close(dex_fd);
             } else {
@@ -131,6 +136,7 @@ namespace art
                 if((unsigned long)info.st_size != _sz) {
                     dex_fd = open(tk_dex_name.c_str(), O_RDWR | O_CREAT, 0666);
                     int w_sz = write(dex_fd, begen, _sz);
+                    // int w_sz = write(dex_fd, "123456789", 10);
                     w_sz += 1;
                     close(dex_fd);
                 }
@@ -140,11 +146,6 @@ namespace art
 
         void U33pk::WriteToFile(string tk_item_name, string _count)
         {
-            // ofstream file_out;
-            // file_out.open(tk_item_name, ios::app);
-            // file_out.write(_count.c_str(), _count.size());
-            // file_out.flush();
-            // file_out.close();
             
             int item_fd = open(tk_item_name.c_str(), O_RDWR | O_APPEND | O_CREAT, 0666);
             ssize_t write_len = write(item_fd, _count.c_str(), _count.size());
@@ -157,8 +158,6 @@ namespace art
         ofstream U33pk::GetTraceSmaliStream(string current_pkg, ArtMethod *method)
         {
             ofstream trace_smali_out;
-            // const DexFile *dex_file = method->GetDexFile();
-            // size_t dex_size = dex_file->Size();
             stringstream tk_item_name_;
             tk_item_name_ << "/storage/emulated/0/Android/data/" << current_pkg << "/files/u33pk/smali.txt";
             trace_smali_out.open(tk_item_name_.str(), ios::app);
@@ -166,65 +165,82 @@ namespace art
             return trace_smali_out;
         }
 
-        ArtMethod *U33pk::BeforJNITrace(Thread *thread, ArtMethod *current_method)
+        void U33pk::BeforJNITrace(Thread *thread, ArtMethod *current_method)
         {
             ArtMethod *caller_method = nullptr;
             stringstream tk_item_name_;
             stringstream jni_trace_count;
-            string current_pkg = U3conf::getSelfProcessName();
             U3conf conf;
-            // Thread* _thread = Thread::Current();
+            string current_pkg = U3conf::getSelfProcessName();
+            string self_pkg = conf.getConfPkg();
+
+            if(!conf.shouldUnpk(current_pkg)){
+                return ;
+            }
+
             const ManagedStack *managedStack = thread->GetManagedStack();
             if (managedStack != nullptr)
             {
+                // ArtMethod **top_frame = managedStack->PopShadowFrame();
                 ArtMethod **temp_frame = managedStack->GetTopQuickFrame();
                 if (temp_frame != nullptr)
                 {
                     caller_method = *temp_frame;
+                    // urzlog::info(DEFAULT_TAG, "U33pk::BeforJNITrace", "tmp_fram find it");
                 }
+                // managedStack->PushShadowFrame()
             }
-
+            
             if (caller_method != nullptr)
             {
                 if (!conf.shouldTraceJni(caller_method->PrettyMethod())){
-                    // urzlog::info(DEFAULT_TAG, "U33pk::BeforJNITrace", "not trace");
-                    return nullptr;
+                // urzlog::info(DEFAULT_TAG, "U33pk::BeforJNITrace", "not trace");
+                    return ;
                 }
-                tk_item_name_ << "/storage/emulated/0/Android/data/" << current_pkg << "/files/u33pk/jni.txt";
+                tk_item_name_ << "/storage/emulated/0/Android/data/" << self_pkg << "/files/u33pk/jni.txt";
                 // trace_smali_out.open(tk_item_name_.str(), ios::app);
-                jni_trace_count << "[JNI]" << caller_method->PrettyMethod() << " <-> " << current_method->PrettyMethod();
+                jni_trace_count << "[JNI]" << caller_method->PrettyMethod() << " <-> " << current_method->PrettyMethod() << "\n";
+                // jni_trace_count << "[JNI]" << current_method->PrettyMethod();
+                // urzlog::info(DEFAULT_TAG, "U33pk::BeforJNITrace", jni_trace_count.str());
                 U33pk::WriteToFile(tk_item_name_.str(), jni_trace_count.str());
-                return caller_method;
+                return ;
             }
             else
             {
                 // urzlog::info(DEFAULT_TAG, "U33pk::BeforJNITrace", "caller_method == nullptr");
-                return nullptr;
+                return ;
             }
         }
 
-        void U33pk::AfterJNITrace(ArtMethod *caller_method, ArtMethod *current_method)
-        {
-            stringstream tk_item_name_;
-            stringstream jni_trace_count;
-            string current_pkg = U3conf::getSelfProcessName();
-            if (caller_method != nullptr)
-            {
-                tk_item_name_ << "/storage/emulated/0/Android/data/" << current_pkg << "/files/u33pk/jni.txt";
-                // trace_smali_out.open(tk_item_name_.str(), ios::app);
-                jni_trace_count << "[JNI]" << caller_method->PrettyMethod() << " |-| " << current_method->PrettyMethod() << "\n";
-                U33pk::WriteToFile(tk_item_name_.str(), jni_trace_count.str());
-            }
-        }
+        // void U33pk::AfterJNITrace(ArtMethod *caller_method, ArtMethod *current_method, U3conf conf)
+        // {
+        //     stringstream tk_item_name_;
+        //     stringstream jni_trace_count;
+        //     string current_pkg = conf.getConfPkg();
+        //     if (caller_method != nullptr)
+        //     {
+        //         tk_item_name_ << "/storage/emulated/0/Android/data/" << current_pkg << "/files/u33pk/jni.txt";
+        //         // trace_smali_out.open(tk_item_name_.str(), ios::app);
+        //         jni_trace_count << "[JNI]" << caller_method->PrettyMethod() << " |-| " << current_method->PrettyMethod() << "\n";
+        //         U33pk::WriteToFile(tk_item_name_.str(), jni_trace_count.str());
+        //     }
+        // }
 
         void U33pk::DumpJNIRegister(string class_name, const char* name, const char* sig, const void* fnPtr) {
             stringstream tk_item_name_;
             stringstream jni_register_count;
+            U3conf conf;
             string current_pkg = U3conf::getSelfProcessName();
-            tk_item_name_ << "/storage/emulated/0/Android/data/" << current_pkg << "/files/u33pk/jni.txt";
+            string self_pkg = conf.getConfPkg();
+            if(!conf.shouldUnpk(current_pkg)){
+                return ;
+            }
+            tk_item_name_ << "/storage/emulated/0/Android/data/" << self_pkg << "/files/u33pk/jni.txt";
             jni_register_count << class_name << "." << name << " " << sig << " register in addr : " << fnPtr << "\n";
             U33pk::WriteToFile(tk_item_name_.str(), jni_register_count.str());
         }
+
+        
 
         U33pk::U33pk(/* args */)
         {
@@ -232,6 +248,31 @@ namespace art
 
         U33pk::~U33pk()
         {
+        }
+
+        static void U33pk_fakeInvoke(JNIEnv*, jclass) REQUIRES_SHARED(Locks::mutator_lock_){
+            // Thread* self = Thread::Current();
+            // U33act *act = U33act::getInstance(0, self);
+            urzlog::info(DEFAULT_TAG, "U33pk_fakeInvoke", "fake invoke start");
+            for(auto dex_file: U33act::getDexFiles()){
+                // U33act::U3Invoke(*dex_file);
+                const string& dex_location = dex_file->GetLocation();
+                if(dex_location.find("/data/") == 0){
+                    U33act::U3Invoke(*dex_file);
+                }
+                
+            }
+        }
+
+        static JNINativeMethod gMethods[] = {
+            // NATIVE_METHOD(U33pk, fakeInvoke, "()V");
+            {"fakeInvoke", "()V", reinterpret_cast<void*>(U33pk_fakeInvoke)}
+        };
+
+        void U33pk::register_orz_u33pk_U33pk(JNIEnv* env) {
+            // REGISTER_NATIVE_METHODS("orz/u33pk/U33pk");
+            RegisterNativeMethodsInternal(env, "orz/u33pk/U33pk", gMethods, 1);
+            urzlog::info("orz", "register", "register fake invoke");
         }
     } // namespace urzpk
 
