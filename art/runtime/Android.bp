@@ -355,6 +355,8 @@ libart_cc_defaults {
                 // ART is allowed to link to libicuuc directly
                 // since they are in the same module
                 "-DANDROID_LINK_SHARED_ICU4C",
+                "-Wno-error",
+                "-DART_USE_CXX_INTERPRETER=1"
             ],
         },
         android_arm: {

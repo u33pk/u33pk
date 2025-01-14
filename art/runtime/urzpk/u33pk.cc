@@ -54,6 +54,12 @@ namespace art
             {
                 
                 const DexFile *dex_file = method->GetDexFile();
+                
+                const string& dex_location = dex_file->GetLocation();
+                if (dex_location.find("/system/") != std::string::npos || dex_location.find("/apex/") != std::string::npos ) {
+                    // 如果是framework就不dump
+                    return;
+                }
                 const uint8_t *dex_begin = dex_file->Begin();
                 size_t dex_size = dex_file->Size();
                 //                LOG(INFO) << to_string(dex_size);
@@ -84,7 +90,8 @@ namespace art
                 // urzlog::info(DEFAULT_TAG, "DumpArtMethod", self_name);
                 const DexFile *dex_file = method->GetDexFile();
                 const string& dex_location = dex_file->GetLocation();
-                if (dex_location.find("/data/") != 0) {
+                if (dex_location.find("/system/") != std::string::npos || dex_location.find("/apex/") != std::string::npos ){
+                    // 如果是framework就不dump
                     return;
                 }
                 size_t dex_size = dex_file->Size();
@@ -257,7 +264,7 @@ namespace art
             for(auto dex_file: U33act::getDexFiles()){
                 // U33act::U3Invoke(*dex_file);
                 const string& dex_location = dex_file->GetLocation();
-                if(dex_location.find("/data/") == 0){
+                if (dex_location.find("/system/") == std::string::npos || dex_location.find("/apex/") == std::string::npos ){
                     U33act::U3Invoke(*dex_file);
                 }
                 

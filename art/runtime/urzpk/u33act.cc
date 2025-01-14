@@ -75,6 +75,7 @@ namespace art {
                 return;
             }
             else {
+                std::string method_name = method->PrettyMethod();
                 uint32_t args_size = (uint32_t)ArtMethod::NumArgRegisters(method->GetShorty());
                 if (!method->IsStatic()) {
                     args_size += 1;
@@ -84,7 +85,7 @@ namespace art {
                 Thread *self=Thread::Current();
                 self->SetThreadName("114514");
                 std::vector<uint32_t> args(args_size, 0);
-                // urzlog::info(DEFAULT_TAG, "U33act::FakeInvoke", method->PrettyMethod());
+                urzlog::info(DEFAULT_TAG, "U33act::FakeInvoke", method_name);
                 // urzlog::info(DEFAULT_TAG, "U33act::FakeInvoke", std::to_string(args_size));
                 result.SetI(114514);
 

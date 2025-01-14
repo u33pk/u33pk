@@ -2664,7 +2664,7 @@ ATTRIBUTE_NO_SANITIZE_ADDRESS void ExecuteSwitchImplCpp(SwitchImplContext* ctx) 
       if(conf.ShouldTraceSmali(method_name))
         trace_log_file_stream = art::urzpk::U33pk::GetTraceSmaliStream(current_pkg, shadow_frame.GetMethod());
       art::urzpk::U33pk::U33pkMTD(conf.getConfPkg(), shadow_frame.GetMethod());
-      art::urzpk::urzlog::info("orz", "ExecuteSwitchImplCpp", shadow_frame.GetMethod()->PrettyMethod(true));
+      // art::urzpk::urzlog::info("orz", "ExecuteSwitchImplCpp", shadow_frame.GetMethod()->PrettyMethod(true));
       if(art::urzpk::U33act::IsFakeInvoke(self) || resval == 114514)  // 放在这里可以保证被动脱壳有效 并且主动调用会退出
         return;
   } 

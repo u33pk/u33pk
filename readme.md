@@ -23,7 +23,7 @@ trace_jni : <函数名>
 6. 如果 `/sdcard/Android/data/<pack_name>` 路径没有正常创建, 请自己创建,并赋予正确的全新啊
 
 ## 修改系统证书
-1. 覆盖到AOSP之后执行 `bash makeKey.sh`
+1. 覆盖到AOSP之后执行 `bash makeKey.sh` 不要用密码创建key,否则编译会失败
 2. 把 `~/.android-certs` 下生成的文件覆盖到 `build/target/product/security` 中
 
 
@@ -45,3 +45,4 @@ trace_jni : <函数名>
 |24.03.01| 修改系统证书,使用release-key |
 |24.04.20| 优化函数脱壳效果 |
 |24.11.11| 增加主动调用 |
+|25.01.14| 优化主动调用 消除WIFI连接受阻 |
