@@ -15,13 +15,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class U33pk {
+    private static final String TAG = "U33PK";
     private static final String CONF_PATH = "/data/local/tmp/u33pk.conf";
     private static final String FAKT_TAG = "fake_invoke : ";
     private static final String UPK_TAG = "u33pk_pkg : ";
+    private static final String FD_TAG = "fd_pkg : ";
     private static final int SLEEP_TIME = 30 * 1000;
     // private Context
     private String u33pk_pkg = "";
     private boolean should_invoke = false;
+    private String fd_pkg = "";
 
     public U33pk(){
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(CONF_PATH))) {
@@ -34,9 +37,11 @@ public final class U33pk {
                     }
                 } else if(line.startsWith(UPK_TAG)) {
                     this.u33pk_pkg = line.substring(12).replaceAll("\\p{C}", "");
+                } else if(line.startsWith(FD_TAG)) {
+                    this.fd_pkg = line.substring(9).replaceAll("\\p{C}", "");
                 }
             }
-            Log.i("u33pk",  this.u33pk_pkg + " " + String.valueOf(this.should_invoke));
+            Log.i(TAG,  this.u33pk_pkg + " " + String.valueOf(this.should_invoke));
         } catch (Exception e) {
             
         }
@@ -47,11 +52,11 @@ public final class U33pk {
             if(this.shouldUnpk() && this.shouldInvoke()){
                 try{
                     Thread.sleep(SLEEP_TIME);
-                    Log.i("u33pk", "wait fake start");
+                    Log.i(TAG, "wait fake start");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                Log.i("u33pk", "fake start");
+                Log.i(TAG, "fake start");
                 U33pk.fakeInvoke();
             }
         });
@@ -201,6 +206,15 @@ public final class U33pk {
         return resultClassloader;
     }
     
+    public void loadFRD(){
+        String pkg = ActivityThread.currentProcessName();
+        if(pkg != null && this.fd_pkg.equals(pkg)){
+            System.loadLibrary("Alog");
+            Log.i(TAG, pkg + " load libAlog.so success [orz]");
+        } else {
+            Log.i(TAG, pkg + " load libAlog.so error [orz]");
+        }
+    } 
 
     public static native void fakeInvoke();
 

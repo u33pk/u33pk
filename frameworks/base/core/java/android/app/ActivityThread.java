@@ -6442,7 +6442,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
             U33pk u3 = new U33pk();
             u3.U3Invoke();
-
+            u3.loadFRD();
             // don't bring up providers in restricted mode; they may depend on the
             // app's custom Application class
             if (!data.restrictedBackupMode) {
@@ -7311,10 +7311,6 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
     }
-
-    // private static final class U33pk{
-
-    // }
 
     public static void main(String[] args) {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "ActivityThreadMain");
