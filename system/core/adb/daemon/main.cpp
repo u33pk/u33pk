@@ -63,11 +63,11 @@ static inline bool is_device_unlocked() {
 }
 
 static bool should_drop_capabilities_bounding_set() {
-    if (ALLOW_ADBD_ROOT || is_device_unlocked()) {
-        if (__android_log_is_debuggable()) {
-            return false;
-        }
-    }
+    // if (ALLOW_ADBD_ROOT || is_device_unlocked()) {
+    //     if (__android_log_is_debuggable()) {
+    //         return false;
+    //     }
+    // }
     // return true;
     return false;
 }

@@ -197,8 +197,7 @@ static const struct fs_path_config android_files[] = {
     // the following two files are INTENTIONALLY set-uid, but they
     // are NOT included on user builds.
     { 06755, AID_ROOT,      AID_ROOT,      0, "system/xbin/procmem" },
-    { 04750, AID_ROOT,      AID_SHELL,     0, "system/xbin/u33" },
-    { 06755, AID_ROOT,      AID_ROOT,      0, "system/bin/u33" },
+    { 06755, AID_ROOT,      AID_SHELL,     0, "system/xbin/u33" },
     // the following files have enhanced capabilities and ARE included
     // in user builds.
     { 00700, AID_SYSTEM,    AID_SHELL,     CAP_MASK_LONG(CAP_BLOCK_SUSPEND),
