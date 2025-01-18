@@ -13,6 +13,7 @@ u33pk_func : <函数名>
 fake_invoke : true/false
 trace_smali : <函数名>
 trace_jni : <函数名>
+fd_pkg : <加载frida的包名>
 ```
 ## 需要注意
 1. 如果要脱函数， 必须在要脱壳的app内， 即 `u33pk_func` 单独使用不生效
@@ -26,12 +27,16 @@ trace_jni : <函数名>
 1. 覆盖到AOSP之后执行 `bash makeKey.sh` 不要用密码创建key,否则编译会失败
 2. 把 `~/.android-certs` 下生成的文件覆盖到 `build/target/product/security` 中
 
+## frida支持
+1. 可以自己定制frida-gadget,也可以使用官方的frida-gadget, 改成"libxxx.so"(自定义的so的名字)放到 out/target/product/sailfish/system/lib(64)/libxxx.so目录下,尽量32/64两个目录都放进去
+2. 修改`frameworks/base/core/java/orz/u33pk/U33pk.java`中的`libfd_name`字段的名字即可,这个地方去掉前面的"lib"和后面的".so", 中间剩下的就是name
+3. 修改配置文件,添加包名, 该配置可单独生效
+4. 如果frida-gadget不是定制的,读取的gadget配置文件是默认的libxxx.config.so,也需要自行在编译的时候一起放入libxxx.so的同目录下
 
 # 未来支持
-1. frida集成
-2. ART 流量 FUZZ
-3. 反反调
-4. 或想起来的其他
+1. ART 流量 FUZZ
+2. 反反调
+3. 或想起来的其他
 
 # 更新内容
 
@@ -46,3 +51,4 @@ trace_jni : <函数名>
 |24.04.20| 优化函数脱壳效果 |
 |24.11.11| 增加主动调用 |
 |25.01.14| 优化主动调用 消除WIFI连接受阻 |
+|25.01.18| 添加frida支持 |

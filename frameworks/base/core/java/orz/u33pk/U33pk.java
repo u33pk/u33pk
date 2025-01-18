@@ -20,6 +20,7 @@ public final class U33pk {
     private static final String FAKT_TAG = "fake_invoke : ";
     private static final String UPK_TAG = "u33pk_pkg : ";
     private static final String FD_TAG = "fd_pkg : ";
+    private static final String libfd_name = "Alog";
     private static final int SLEEP_TIME = 30 * 1000;
     // private Context
     private String u33pk_pkg = "";
@@ -209,7 +210,7 @@ public final class U33pk {
     public void loadFRD(){
         String pkg = ActivityThread.currentProcessName();
         if(pkg != null && this.fd_pkg.equals(pkg)){
-            System.loadLibrary("Alog");
+            System.loadLibrary(libfd_name);
             Log.i(TAG, pkg + " load libAlog.so success [orz]");
         } else {
             Log.i(TAG, pkg + " load libAlog.so error [orz]");
